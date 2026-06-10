@@ -13,14 +13,17 @@
 ## Что уже изменено
 
 - Display name: `LocalDPI`
+- Author: `Remaxiv`
 - Bundle ID приложения: `com.localdpi.tunnel`
 - Bundle ID extension: `com.localdpi.tunnel.ext`
 - Provider ID в коде: `com.localdpi.tunnel.ext`
-- Дефолтные аргументы сделаны короче и понятнее:
+- Дефолтные аргументы:
 
 ```text
---pf 443 --proto tls --disorder 1 --split -5+se --auto=none --pf 80 --proto http --auto=none
+--pf 443 --proto tls --disorder 1 --split -5+se --auto=none --pf 443 --proto udp --ttl 64 --udp-fake 20 --fake-data ':@\0...' --auto=none
 ```
+
+В приложении fake-data генерируется полностью: `:@` + 512 `\0`.
 
 ## Важное ограничение
 
@@ -76,10 +79,11 @@ ciadpi -i ::1 -p 8080 -x 2
 5. После подключения в статусбаре должен появиться VPN.
 6. Если сайты не открываются, сначала попробовать DNS `8.8.8.8`, затем отключить IPv6.
 
+Если iPadOS не показывает запрос на добавление VPN-профиля, приложение теперь должно показать alert с ошибкой. Чаще всего причина в том, что способ установки не выдал приложению entitlement `packet-tunnel-provider`.
+
 ## Где находится основная логика
 
 - `RMRootViewController.m`: создание VPN-профиля и запуск tunnel.
 - `RMSettingsViewController.m`: настройки `IPv6`, `DNS Server`, `Arguments`.
 - `RumbleExt/PacketTunnelProvider.m`: TUN, DNS, routes, запуск `byedpi` и `hev-socks5-tunnel`.
 - `RumbleExt/Makefile`: сборка `byedpi`, `hev-socks5-tunnel`, `lwip`, `yaml`.
-

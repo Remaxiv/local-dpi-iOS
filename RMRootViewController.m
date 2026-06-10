@@ -3,6 +3,10 @@
 #import <NotificationCenter/NotificationCenter.h>
 
 #import "RMRootViewController.h"
+#import "RMSettingsViewController.h"
+
+static NSString * const RMLocalDPIProviderBundleIdentifier = @"com.localdpi.tunnel.ext";
+static NSString * const RMLocalDPIProfileName = @"LocalDPI";
 
 @implementation RMRootViewController
 + (NSArray<NSString *> *)shellSplit:(NSString *)string {
@@ -64,6 +68,17 @@
 	return tokens;
 }
 
+- (void)showError:(NSString *)message {
+	dispatch_async(dispatch_get_main_queue(), ^{
+		UIAlertController *alert = [UIAlertController
+			alertControllerWithTitle:@"LocalDPI"
+			message:message
+			preferredStyle:UIAlertControllerStyleAlert];
+		[alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+		[self presentViewController:alert animated:YES completion:nil];
+	});
+}
+
 - (void)loadView {
 	// [super loadView];
 	self.view = [[UIView alloc] init];
@@ -107,52 +122,41 @@
 		if (error)
 		{
 			NSLog(@"loadAllFromPreferences error: %@", error);
+			[self showError:error.localizedDescription];
 			return;
 		}
 
-		NETunnelProviderManager *mgr = managers.lastObject;
-		NETunnelProviderProtocol *prot = nil;
-		if (mgr)
+		NETunnelProviderManager *mgr = nil;
+		for (NETunnelProviderManager *candidate in managers)
 		{
-			/* There is existing manager. Is it enabled? */
-			if (mgr.enabled)
+			NETunnelProviderProtocol *candidateProtocol = (NETunnelProviderProtocol *)candidate.protocolConfiguration;
+			if ([candidateProtocol isKindOfClass:[NETunnelProviderProtocol class]]
+					&& [candidateProtocol.providerBundleIdentifier isEqualToString:RMLocalDPIProviderBundleIdentifier])
 			{
-				/* If it is then just load it */
-				[mgr loadFromPreferencesWithCompletionHandler:
-					^(NSError * _Nullable error) {
-						if (error)
-						{
-							NSLog(@"loadFromPreferences error: %@", error);
-						}
-
-						withManager(mgr);
-					}];
-				return;
-			}
-			else
-			{
-				/* If it isn't then enable it & save the profile */
-				mgr.enabled = YES;
+				mgr = candidate;
+				break;
 			}
 		}
-		else
+
+		if (!mgr)
 		{
-			/* No manager - create new one */
 			mgr = [[NETunnelProviderManager alloc] init];
-			prot = [[NETunnelProviderProtocol alloc] init];
-			mgr.protocolConfiguration = prot;
-
-			mgr.localizedDescription = @"LocalDPI";
-			prot.providerBundleIdentifier = @"com.localdpi.tunnel.ext";
-			prot.serverAddress = @"localhost";
-			mgr.enabled = YES;
 		}
+
+		NETunnelProviderProtocol *prot = [[NETunnelProviderProtocol alloc] init];
+		prot.providerBundleIdentifier = RMLocalDPIProviderBundleIdentifier;
+		prot.serverAddress = @"LocalDPI";
+		prot.disconnectOnSleep = NO;
+		mgr.localizedDescription = RMLocalDPIProfileName;
+		mgr.protocolConfiguration = prot;
+		mgr.enabled = YES;
 
 		[mgr saveToPreferencesWithCompletionHandler:^(NSError * _Nullable error) {
 
 			if (error)
 			{
 				NSLog(@"saveToPreferences error: %@", error);
+				[self showError:error.localizedDescription];
 				return;
 			}
 
@@ -161,6 +165,7 @@
 					if (error)
 					{
 						NSLog(@"loadFromPreferences error: %@", error);
+						[self showError:error.localizedDescription];
 						return;
 					}
 
@@ -181,15 +186,21 @@
 		      NSLog(@"Starting VPN tunnel...");
 		      NSError *startError;
 		      NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+		      NSString *args = [defaults objectForKey:@"Args"];
+		      if (!args)
+		      {
+			      args = [RMSettingsViewController defaultArguments];
+		      }
 		      NSDictionary * options = @{
 			      @"Args": [RMRootViewController shellSplit:
-			[@"ciadpi -i ::1 -p 8080 -x 2 " stringByAppendingString:[defaults objectForKey:@"Args"]]],
+			[@"ciadpi -i ::1 -p 8080 -x 2 " stringByAppendingString:args]],
 			      @"IPv6": [NSNumber numberWithBool:[defaults boolForKey:@"IPv6"]],
 			      @"DNSServer": [defaults objectForKey:@"DNSServer"],
 		      };
 		      [mgr.connection startVPNTunnelWithOptions:options andReturnError:&startError];
 		      if (startError) {
 			      NSLog(@"startVPNTunnel error: %@", startError.localizedDescription);
+			      [self showError:startError.localizedDescription];
 		      }
 		      /* Prevent connections from leaking */
 		      [[NSNotificationCenter defaultCenter]

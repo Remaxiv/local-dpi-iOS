@@ -2,34 +2,55 @@
 #import "RMSettingsViewController.h"
 
 @implementation RMSettingsViewController
++ (NSString *)defaultArguments {
+	NSMutableString *fakeData = [NSMutableString stringWithString:@":@"];
+	for (NSUInteger i = 0; i < 512; ++i)
+	{
+		[fakeData appendString:@"\\0"];
+	}
+
+	return [NSString stringWithFormat:
+		@"--pf 443 --proto tls --disorder 1 --split -5+se --auto=none "
+		"--pf 443 --proto udp --ttl 64 --udp-fake 20 --fake-data '%@' --auto=none",
+		fakeData];
+}
+
 - (void)loadView {
 	[super loadView];
 
 	self.navigationItem.title = @"Settings";
 
 	self->settings = @[
+		@{@"display": @"Author", @"value": @"Remaxiv", @"type": @"INFO"},
+
 		@{@"name": @"IPv6", @"display": @"Use IPv6", @"type": @"BOOL"},
 
 		@{@"name": @"DNSServer", @"display": @"DNS Server",
 		  @"type": NSStringFromClass([NSString class]), @"default": @"1.1.1.1"},
 
 		@{@"name": @"Args", @"display": @"Arguments",
-		  @"type": NSStringFromClass([NSString class]), @"default":
-			@"--pf 443 --proto tls --disorder 1 --split -5+se --auto=none "
-			"--pf 80 --proto http --auto=none"
-		},
+		  @"type": NSStringFromClass([NSString class]), @"default": [RMSettingsViewController defaultArguments]},
 	];
 }
 
 - (void) viewDidLoad {
 	for (NSDictionary *setting in self->settings) {
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+		NSString *settingName = setting[@"name"];
 		id defaultValue = setting[@"default"];
 		if (defaultValue != nil
-				&& [defaults objectForKey:setting[@"name"]] == nil)
+				&& settingName != nil
+				&& [defaults objectForKey:settingName] == nil)
 		{
-			[defaults setObject:defaultValue forKey:setting[@"name"]];
+			[defaults setObject:defaultValue forKey:settingName];
 		}
+	}
+
+	NSString *oldDefaultArgs = @"--pf 443 --proto tls --disorder 1 --split -5+se --auto=none --pf 80 --proto http --auto=none";
+	NSString *currentArgs = [[NSUserDefaults standardUserDefaults] stringForKey:@"Args"];
+	if ([currentArgs isEqualToString:oldDefaultArgs])
+	{
+		[[NSUserDefaults standardUserDefaults] setObject:[RMSettingsViewController defaultArguments] forKey:@"Args"];
 	}
 
 	self.tableView.dataSource = self;
@@ -69,7 +90,20 @@
 	cell.selectionStyle = UITableViewCellSelectionStyleNone;
 
 	NSString *typeName = setting[@"type"];
-	if ([@"BOOL" isEqualToString:typeName])
+	if ([@"INFO" isEqualToString:typeName])
+	{
+		UITableViewCell *infoCell = [tableView dequeueReusableCellWithIdentifier:@"InfoCell"];
+		if (infoCell == nil)
+		{
+			infoCell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"InfoCell"];
+		}
+		infoCell.selectionStyle = UITableViewCellSelectionStyleNone;
+		infoCell.textLabel.text = setting[@"display"];
+		infoCell.detailTextLabel.text = setting[@"value"];
+		[[infoCell.contentView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+		return infoCell;
+	}
+	else if ([@"BOOL" isEqualToString:typeName])
 	{
 		cell.textLabel.text = setting[@"display"];
 

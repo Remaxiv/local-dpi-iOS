@@ -5,4 +5,6 @@
 	NSArray *settings;
 }
 
++ (NSString *)defaultArguments;
+
 @end
