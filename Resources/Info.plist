@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleExecutable</key>
-	<string>Rumble</string>
+	<string>LocalDPI</string>
 	<key>CFBundleDisplayName</key>
 	<string>LocalDPI</string>
 	<key>CFBundleIcons</key>

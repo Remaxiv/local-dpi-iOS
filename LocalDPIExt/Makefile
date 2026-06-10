@@ -1,6 +1,6 @@
 TARGET := iphone:clang:14.5:9.0
 ARCHS = arm64
-INSTALL_TARGET_PROCESSES = Rumble
+INSTALL_TARGET_PROCESSES = LocalDPI
 ADDITIONAL_OBJCFLAGS = -Wunguarded-availability
 
 include $(THEOS)/makefiles/common.mk
@@ -98,22 +98,22 @@ $(eval $(call abi_fix,byedpi))
 
 include $(THEOS_MAKE_PATH)/library.mk
 
-APPEX_NAME = RumbleExt
+APPEX_NAME = LocalDPIExt
 
-RumbleExt_FILES = PacketTunnelProvider.m
-RumbleExt_FRAMEWORKS = NetworkExtension
-RumbleExt_CFLAGS = -fobjc-arc -Ihev-socks5-tunnel/include
-RumbleExt_LDFLAGS = \
+LocalDPIExt_FILES = PacketTunnelProvider.m
+LocalDPIExt_FRAMEWORKS = NetworkExtension
+LocalDPIExt_CFLAGS = -fobjc-arc -Ihev-socks5-tunnel/include
+LocalDPIExt_LDFLAGS = \
 		    -L$(THEOS_OBJ_DIR) \
 		    $(THEOS_OBJ_DIR)/hev-socks5-tunnel.a \
 		    $(THEOS_OBJ_DIR)/byedpi.a\
 		    $(THEOS_OBJ_DIR)/yaml.a \
 		    $(THEOS_OBJ_DIR)/lwip.a \
 		    $(THEOS_OBJ_DIR)/hev-task-system.a
-RumbleExt_CODESIGN_FLAGS = -Sentitlements.xml
-RumbleExt_USE_MODULES := 0
-$(eval $(call abi_fix,RumbleExt))
-RumbleExt_INSTALL_PATH = /Applications/Rumble.app/PlugIns
+LocalDPIExt_CODESIGN_FLAGS = -Sentitlements.xml
+LocalDPIExt_USE_MODULES := 0
+$(eval $(call abi_fix,LocalDPIExt))
+LocalDPIExt_INSTALL_PATH = /Applications/LocalDPI.app/PlugIns
 
 include $(THEOS_MAKE_PATH)/appex.mk
 

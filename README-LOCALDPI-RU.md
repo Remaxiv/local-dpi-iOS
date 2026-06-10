@@ -1,6 +1,6 @@
 # LocalDPI for iPadOS
 
-Это локальный VPN для iPadOS по схеме Rumble:
+Это локальный VPN для iPadOS:
 
 1. Основное приложение создает `NETunnelProviderManager`.
 2. Packet Tunnel extension создает локальный TUN через `NEPacketTunnelProvider`.
@@ -85,5 +85,5 @@ ciadpi -i ::1 -p 8080 -x 2
 
 - `RMRootViewController.m`: создание VPN-профиля и запуск tunnel.
 - `RMSettingsViewController.m`: настройки `IPv6`, `DNS Server`, `Arguments`.
-- `RumbleExt/PacketTunnelProvider.m`: TUN, DNS, routes, запуск `byedpi` и `hev-socks5-tunnel`.
-- `RumbleExt/Makefile`: сборка `byedpi`, `hev-socks5-tunnel`, `lwip`, `yaml`.
+- `LocalDPIExt/PacketTunnelProvider.m`: TUN, DNS, routes, запуск `byedpi` и `hev-socks5-tunnel`.
+- `LocalDPIExt/Makefile`: сборка `byedpi`, `hev-socks5-tunnel`, `lwip`, `yaml`.

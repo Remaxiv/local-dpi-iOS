@@ -7,7 +7,7 @@
     <key>CFBundleName</key>
     <string>LocalDPI Tunnel</string>
     <key>CFBundleExecutable</key>
-    <string>RumbleExt</string>
+    <string>LocalDPIExt</string>
     <key>CFBundleIdentifier</key>
     <string>com.localdpi.tunnel.ext</string>
     <key>CFBundleInfoDictionaryVersion</key>

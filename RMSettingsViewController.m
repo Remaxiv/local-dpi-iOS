@@ -11,7 +11,7 @@
 
 	return [NSString stringWithFormat:
 		@"--pf 443 --proto tls --disorder 1 --split -5+se --auto=none "
-		"--pf 443 --proto udp --ttl 64 --udp-fake 20 --fake-data '%@' --auto=none",
+		"--pf 443 --proto udp --ttl 64 --udp-fake 20 --fake-data '%@'",
 		fakeData];
 }
 
@@ -46,12 +46,7 @@
 		}
 	}
 
-	NSString *oldDefaultArgs = @"--pf 443 --proto tls --disorder 1 --split -5+se --auto=none --pf 80 --proto http --auto=none";
-	NSString *currentArgs = [[NSUserDefaults standardUserDefaults] stringForKey:@"Args"];
-	if ([currentArgs isEqualToString:oldDefaultArgs])
-	{
-		[[NSUserDefaults standardUserDefaults] setObject:[RMSettingsViewController defaultArguments] forKey:@"Args"];
-	}
+	[[NSUserDefaults standardUserDefaults] setObject:[RMSettingsViewController defaultArguments] forKey:@"Args"];
 
 	self.tableView.dataSource = self;
 	self.tableView.delegate = self;
@@ -82,13 +77,6 @@
 		return nil;
 	}
 
-	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([UITableViewCell class])];
-	if (cell == nil)
-	{
-		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:NSStringFromClass([UITableViewCell class])];
-	}
-	cell.selectionStyle = UITableViewCellSelectionStyleNone;
-
 	NSString *typeName = setting[@"type"];
 	if ([@"INFO" isEqualToString:typeName])
 	{
@@ -100,11 +88,16 @@
 		infoCell.selectionStyle = UITableViewCellSelectionStyleNone;
 		infoCell.textLabel.text = setting[@"display"];
 		infoCell.detailTextLabel.text = setting[@"value"];
-		[[infoCell.contentView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
 		return infoCell;
 	}
 	else if ([@"BOOL" isEqualToString:typeName])
 	{
+		UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"BoolCell"];
+		if (cell == nil)
+		{
+			cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"BoolCell"];
+		}
+		cell.selectionStyle = UITableViewCellSelectionStyleNone;
 		cell.textLabel.text = setting[@"display"];
 
 		BOOL value = [[NSUserDefaults standardUserDefaults] boolForKey:setting[@"name"]];
@@ -113,11 +106,17 @@
 		[switchView setTag:indexPath.row];
 		[switchView addTarget:self action:@selector(switchChanged:) forControlEvents:UIControlEventValueChanged];
 		cell.accessoryView = switchView;
-		[[cell.contentView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
 		return cell;
 	}
 	else if ([NSStringFromClass([NSString class]) isEqualToString:typeName])
 	{
+		UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"TextCell"];
+		if (cell == nil)
+		{
+			cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"TextCell"];
+		}
+		cell.selectionStyle = UITableViewCellSelectionStyleNone;
+		[[cell.contentView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
 		cell.textLabel.text = nil;
 		NSString *value = [[NSUserDefaults standardUserDefaults] stringForKey:setting[@"name"]];
 
@@ -156,10 +155,10 @@
 			[stackView.rightAnchor constraintEqualToAnchor:cell.contentView.layoutMarginsGuide.rightAnchor],
 			[stackView.topAnchor constraintEqualToAnchor:cell.contentView.layoutMarginsGuide.topAnchor],
 			[stackView.bottomAnchor constraintEqualToAnchor:cell.contentView.layoutMarginsGuide.bottomAnchor],
-		]];
+		]]; 
 		return cell;
 	}
-	return cell;
+	return [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"EmptyCell"];
 }
 
 
