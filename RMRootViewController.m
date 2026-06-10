@@ -142,8 +142,8 @@
 			prot = [[NETunnelProviderProtocol alloc] init];
 			mgr.protocolConfiguration = prot;
 
-			mgr.localizedDescription = @"Rumble";
-			prot.providerBundleIdentifier = @"com.rpcsx.rumble.ext";
+			mgr.localizedDescription = @"LocalDPI";
+			prot.providerBundleIdentifier = @"com.localdpi.tunnel.ext";
 			prot.serverAddress = @"localhost";
 			mgr.enabled = YES;
 		}

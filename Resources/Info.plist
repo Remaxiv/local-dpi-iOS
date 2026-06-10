@@ -5,7 +5,7 @@
 	<key>CFBundleExecutable</key>
 	<string>Rumble</string>
 	<key>CFBundleDisplayName</key>
-	<string>Rumble</string>
+	<string>LocalDPI</string>
 	<key>CFBundleIcons</key>
 	<dict>
 		<key>CFBundlePrimaryIcon</key>
@@ -40,7 +40,7 @@
 		</dict>
 	</dict>
 	<key>CFBundleIdentifier</key>
-	<string>com.rpcsx.rumble</string>
+	<string>com.localdpi.tunnel</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>

@@ -1,17 +1,10 @@
-TARGET := iphone:clang:latest:9.0
-ARCHS = arm64e arm64 armv7
+TARGET := iphone:clang:14.5:9.0
+ARCHS = arm64
 INSTALL_TARGET_PROCESSES = Rumble
 ADDITIONAL_OBJCFLAGS = -Wunguarded-availability
 
 include $(THEOS)/makefiles/common.mk
 define abi_fix
-ifneq ($(THEOS_PLATFORM_NAME),macosx)
-# New ABI (i.e. objc ptrauth modifications)
-# is available on AppleClang on MacOS only.
-# These flags make oldabi package fix our library.
-$(1)_CFLAGS += -fno-ptrauth-abi-version
-$(1)_LDFLAGS += -ld_classic
-endif
 endef
 
 LIBRARY_NAME := yaml lwip hev-task-system hev-socks5-tunnel byedpi

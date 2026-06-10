@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>application-identifier</key>
-    <string>com.rpcsx.rumble</string>
+    <string>com.localdpi.tunnel</string>
     <key>com.apple.developer.networking.networkextension</key>
     <array>
         <string>packet-tunnel-provider</string>

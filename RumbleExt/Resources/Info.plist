@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleDisplayName</key>
-    <string>Rumble</string>
+    <string>LocalDPI Tunnel</string>
     <key>CFBundleName</key>
-    <string>Rumble</string>
+    <string>LocalDPI Tunnel</string>
     <key>CFBundleExecutable</key>
     <string>RumbleExt</string>
     <key>CFBundleIdentifier</key>
-    <string>com.rpcsx.rumble.ext</string>
+    <string>com.localdpi.tunnel.ext</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundlePackageType</key>
