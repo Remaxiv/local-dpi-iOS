@@ -15,6 +15,16 @@
 		fakeData];
 }
 
++ (NSString *)argumentsHelp {
+	return @"Supported byedpi args in this build:\n"
+		@"--auto, --auto-mode, --cache-ttl, --timeout\n"
+		@"--proto, --pf, --hosts, --ipset\n"
+		@"--split, --disorder, --fake, --oob, --disoob\n"
+		@"--ipfrag, --tlsrec, --tlsrec-pos\n"
+		@"--ttl, --def-ttl, --fake-data, --udp-fake\n"
+		@"--mod-http, --drop-sack, --tls-sni, --tls-sni-pos";
+}
+
 - (void)loadView {
 	[super loadView];
 
@@ -22,6 +32,8 @@
 
 	self->settings = @[
 		@{@"display": @"Author", @"value": @"Remaxiv", @"type": @"INFO"},
+		@{@"display": @"GitHub", @"value": @"github.com/Remaxiv/local-dpi-0.0.1",
+		  @"url": @"https://github.com/Remaxiv/local-dpi-0.0.1", @"type": @"URL"},
 
 		@{@"name": @"IPv6", @"display": @"Use IPv6", @"type": @"BOOL"},
 
@@ -30,6 +42,8 @@
 
 		@{@"name": @"Args", @"display": @"Arguments",
 		  @"type": NSStringFromClass([NSString class]), @"default": [RMSettingsViewController defaultArguments]},
+
+		@{@"display": @"byedpi args", @"value": [RMSettingsViewController argumentsHelp], @"type": @"HELP"},
 	];
 }
 
@@ -78,7 +92,7 @@
 	}
 
 	NSString *typeName = setting[@"type"];
-	if ([@"INFO" isEqualToString:typeName])
+	if ([@"INFO" isEqualToString:typeName] || [@"URL" isEqualToString:typeName])
 	{
 		UITableViewCell *infoCell = [tableView dequeueReusableCellWithIdentifier:@"InfoCell"];
 		if (infoCell == nil)
@@ -88,7 +102,49 @@
 		infoCell.selectionStyle = UITableViewCellSelectionStyleNone;
 		infoCell.textLabel.text = setting[@"display"];
 		infoCell.detailTextLabel.text = setting[@"value"];
+		infoCell.detailTextLabel.textColor = [@"URL" isEqualToString:typeName] ? [UIColor blueColor] : nil;
+		infoCell.accessoryType = [@"URL" isEqualToString:typeName] ? UITableViewCellAccessoryDisclosureIndicator : UITableViewCellAccessoryNone;
 		return infoCell;
+	}
+	else if ([@"HELP" isEqualToString:typeName])
+	{
+		UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"HelpCell"];
+		if (cell == nil)
+		{
+			cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"HelpCell"];
+		}
+		cell.selectionStyle = UITableViewCellSelectionStyleNone;
+		[[cell.contentView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+
+		UILabel *configLabel = [[UILabel alloc] init];
+		configLabel.text = setting[@"display"];
+
+		UITextView *textView = [[UITextView alloc] init];
+		textView.text = setting[@"value"];
+		textView.font = [UIFont fontWithName:@"Courier New" size:[UIFont systemFontSize]];
+		textView.textAlignment = NSTextAlignmentLeft;
+		textView.editable = NO;
+		textView.selectable = YES;
+		textView.scrollEnabled = NO;
+		textView.backgroundColor = [UIColor clearColor];
+		textView.translatesAutoresizingMaskIntoConstraints = NO;
+		[textView setContentHuggingPriority:UILayoutPriorityFittingSizeLevel forAxis:UILayoutConstraintAxisVertical];
+		[textView setContentCompressionResistancePriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisVertical];
+
+		UIStackView *stackView = [[UIStackView alloc] initWithArrangedSubviews:@[configLabel, textView]];
+		[cell.contentView addSubview:stackView];
+		stackView.axis = UILayoutConstraintAxisVertical;
+		stackView.distribution = UIStackViewDistributionFill;
+		stackView.alignment = UIStackViewAlignmentLeading;
+		stackView.spacing = 8;
+		stackView.translatesAutoresizingMaskIntoConstraints = NO;
+		[NSLayoutConstraint activateConstraints:@[
+			[stackView.leftAnchor constraintEqualToAnchor:cell.contentView.layoutMarginsGuide.leftAnchor],
+			[stackView.rightAnchor constraintEqualToAnchor:cell.contentView.layoutMarginsGuide.rightAnchor],
+			[stackView.topAnchor constraintEqualToAnchor:cell.contentView.layoutMarginsGuide.topAnchor],
+			[stackView.bottomAnchor constraintEqualToAnchor:cell.contentView.layoutMarginsGuide.bottomAnchor],
+		]];
+		return cell;
 	}
 	else if ([@"BOOL" isEqualToString:typeName])
 	{
@@ -176,6 +232,16 @@
 	if (self.tableView != tableView)
 	{
 		return;
+	}
+
+	NSDictionary *setting = self->settings[indexPath.row];
+	if ([@"URL" isEqualToString:setting[@"type"]])
+	{
+		NSURL *url = [NSURL URLWithString:setting[@"url"]];
+		if (url)
+		{
+			[[UIApplication sharedApplication] openURL:url];
+		}
 	}
 }
 

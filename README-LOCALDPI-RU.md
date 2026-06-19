@@ -14,6 +14,7 @@
 
 - Display name: `LocalDPI`
 - Author: `Remaxiv`
+- GitHub: `https://github.com/Remaxiv/local-dpi-0.0.1`
 - Bundle ID приложения: `com.localdpi.tunnel`
 - Bundle ID extension: `com.localdpi.tunnel.ext`
 - Provider ID в коде: `com.localdpi.tunnel.ext`
@@ -24,6 +25,8 @@
 ```
 
 В приложении fake-data генерируется полностью: `:@` + 512 `\0`.
+
+В настройках также есть короткая шпаргалка по аргументам `byedpi`, взятая из bundled `byedpi` build.
 
 ## Важное ограничение
 

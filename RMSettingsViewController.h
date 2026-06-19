@@ -6,5 +6,6 @@
 }
 
 + (NSString *)defaultArguments;
++ (NSString *)argumentsHelp;
 
 @end
