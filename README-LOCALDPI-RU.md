@@ -13,8 +13,9 @@
 ## Что уже изменено
 
 - Display name: `LocalDPI`
+- Version: `0.0.5`
 - Author: `Remaxiv`
-- GitHub: `https://github.com/Remaxiv/local-dpi-0.0.1`
+- GitHub: `https://github.com/Remaxiv/local-dpi-ios`
 - Bundle ID приложения: `com.localdpi.tunnel`
 - Bundle ID extension: `com.localdpi.tunnel.ext`
 - Provider ID в коде: `com.localdpi.tunnel.ext`
@@ -63,6 +64,9 @@ make package PACKAGE_FORMAT=ipa
 
 ## Настройки внутри приложения
 
+- `Author`: автор сборки.
+- `Version`: версия IPA.
+- `GitHub`: ссылка на репозиторий.
 - `Use IPv6`: включать IPv6 route через локальный VPN.
 - `DNS Server`: DNS сервер, например `1.1.1.1`, `8.8.8.8` или свой.
 - `Arguments`: аргументы для `byedpi`. Приложение само добавляет начало:
@@ -78,11 +82,11 @@ ciadpi -i ::1 -p 8080 -x 2
 1. Установить IPA.
 2. Открыть LocalDPI.
 3. Нажать кнопку питания.
-4. iPadOS попросит разрешить VPN-конфигурацию.
+4. iPadOS должен попросить разрешить VPN-конфигурацию.
 5. После подключения в статусбаре должен появиться VPN.
 6. Если сайты не открываются, сначала попробовать DNS `8.8.8.8`, затем отключить IPv6.
 
-Если iPadOS не показывает запрос на добавление VPN-профиля, приложение теперь должно показать alert с ошибкой. Чаще всего причина в том, что способ установки не выдал приложению entitlement `packet-tunnel-provider`.
+Если iPadOS не показывает запрос на добавление VPN-профиля, приложение должно показать alert с ошибкой. Чаще всего причина в том, что способ установки не выдал приложению entitlement `packet-tunnel-provider`.
 
 ## Где находится основная логика
 

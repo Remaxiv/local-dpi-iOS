@@ -11,7 +11,7 @@
 
 	return [NSString stringWithFormat:
 		@"--pf 443 --proto tls --disorder 1 --split -5+se --auto=none "
-		"--pf 443 --proto udp --ttl 64 --udp-fake 20 --fake-data '%@'",
+		"--pf 443 --proto udp --ttl 64 --udp-fake 20 --fake-data '%@' --auto=none",
 		fakeData];
 }
 
@@ -32,8 +32,9 @@
 
 	self->settings = @[
 		@{@"display": @"Author", @"value": @"Remaxiv", @"type": @"INFO"},
-		@{@"display": @"GitHub", @"value": @"github.com/Remaxiv/local-dpi-0.0.1",
-		  @"url": @"https://github.com/Remaxiv/local-dpi-0.0.1", @"type": @"URL"},
+		@{@"display": @"Version", @"value": @"0.0.5", @"type": @"INFO"},
+		@{@"display": @"GitHub", @"value": @"github.com/Remaxiv/local-dpi-ios",
+		  @"url": @"https://github.com/Remaxiv/local-dpi-ios", @"type": @"URL"},
 
 		@{@"name": @"IPv6", @"display": @"Use IPv6", @"type": @"BOOL"},
 

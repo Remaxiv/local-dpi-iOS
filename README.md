@@ -1,4 +1,4 @@
-# LocalDPI 0.0.4
+# LocalDPI 0.0.5
 
 LocalDPI is an iPadOS local Packet Tunnel VPN prototype.
 
@@ -8,14 +8,15 @@ Author: `Remaxiv`
 
 ## Downloads
 
-- [`dist/LocalDPI-0.0.4-debug.ipa`](dist/LocalDPI-0.0.4-debug.ipa) - debug IPA built with Theos in WSL.
-- [`dist/ipad-local-dpi-vpn-0.0.4-src.tar.gz`](dist/ipad-local-dpi-vpn-0.0.4-src.tar.gz) - source archive from a WSL filesystem clone so symlinks inside submodules are preserved.
+- [`dist/LocalDPI-0.0.5-debug.ipa`](dist/LocalDPI-0.0.5-debug.ipa) - debug IPA built with Theos in WSL.
+- [`dist/ipad-local-dpi-vpn-0.0.5-src.tar.gz`](dist/ipad-local-dpi-vpn-0.0.5-src.tar.gz) - source archive from a WSL filesystem clone so symlinks inside submodules are preserved.
 
-## Changes in 0.0.4
+## Changes in 0.0.5
 
-- Settings includes a clickable GitHub row for `github.com/Remaxiv/local-dpi-0.0.1`.
+- Settings includes the renamed GitHub repo: `github.com/Remaxiv/local-dpi-ios`.
+- Settings shows the app version.
 - Settings includes a short byedpi arguments reference from the bundled byedpi build.
-- Default `Arguments` remains the requested TLS + UDP fake-data rule.
+- Default `Arguments` exactly matches the requested TLS + UDP fake-data rule, including the final `--auto=none`.
 
 ## Default byedpi args
 
