@@ -1,8 +1,8 @@
 Package: com.localdpi.tunnel
 Name: LocalDPI
-Version: 0.0.1
+Version: 0.0.5
 Architecture: iphoneos-arm
-Description: An awesome application!
-Maintainer: rpcsx
-Author: rpcsx
+Description: Your turn to choose reality!
+Maintainer: Remaxiv
+Author: Remaxiv
 Section: Utilities
