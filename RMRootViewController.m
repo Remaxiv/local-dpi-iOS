@@ -69,6 +69,9 @@ static NSString * const RMLocalDPIProfileName = @"LocalDPI";
 }
 
 - (void)showError:(NSString *)message {
+	[[NSUserDefaults standardUserDefaults] setObject:message forKey:@"LastVPNError"];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+
 	dispatch_async(dispatch_get_main_queue(), ^{
 		UIAlertController *alert = [UIAlertController
 			alertControllerWithTitle:@"LocalDPI"
@@ -195,8 +198,12 @@ static NSString * const RMLocalDPIProfileName = @"LocalDPI";
 			      @"Args": [RMRootViewController shellSplit:
 			[@"ciadpi -i ::1 -p 8080 -x 2 " stringByAppendingString:args]],
 			      @"IPv6": [NSNumber numberWithBool:[defaults boolForKey:@"IPv6"]],
-			      @"DNSServer": [defaults objectForKey:@"DNSServer"],
+			      @"DNSServer": [defaults objectForKey:@"DNSServer"] ?: @"1.1.1.1",
 		      };
+		      [defaults setObject:args forKey:@"LastStartArguments"];
+		      [defaults setObject:@"Starting" forKey:@"LastVPNStatus"];
+		      [defaults setObject:@"" forKey:@"LastVPNError"];
+		      [defaults synchronize];
 		      [mgr.connection startVPNTunnelWithOptions:options andReturnError:&startError];
 		      if (startError) {
 			      NSLog(@"startVPNTunnel error: %@", startError.localizedDescription);
@@ -227,6 +234,10 @@ static NSString * const RMLocalDPIProfileName = @"LocalDPI";
 	}
 
 	NEVPNStatus status = session.status;
+	NSArray<NSString *> *statusNames = @[@"Invalid", @"Disconnected", @"Connecting", @"Connected", @"Reasserting", @"Disconnecting"];
+	NSString *statusName = (status >= 0 && status < statusNames.count) ? statusNames[status] : [NSString stringWithFormat:@"%ld", (long)status];
+	[[NSUserDefaults standardUserDefaults] setObject:statusName forKey:@"LastVPNStatus"];
+	[[NSUserDefaults standardUserDefaults] synchronize];
 
 	NSLog(@"vpnStatusDidChange: %ld, object: %@", (long)status, [notification object]);
 	switch (status)

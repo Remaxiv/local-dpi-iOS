@@ -25,6 +25,41 @@
 		@"--mod-http, --drop-sack, --tls-sni, --tls-sni-pos";
 }
 
++ (NSString *)tlsOnlyArguments {
+	return @"--pf 443 --proto tls --disorder 1 --split -5+se --auto=none";
+}
+
++ (NSString *)aggressiveArguments {
+	NSMutableString *fakeData = [NSMutableString stringWithString:@":@"];
+	for (NSUInteger i = 0; i < 512; ++i)
+	{
+		[fakeData appendString:@"\\0"];
+	}
+
+	return [NSString stringWithFormat:
+		@"--pf 443 --proto tls --disorder 1 --split -5+se --tlsrec 1+s --auto=none "
+		"--pf 443 --proto udp --ttl 64 --udp-fake 20 --fake-data '%@' --auto=none",
+		fakeData];
+}
+
++ (NSString *)diagnosticsSummary {
+	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	NSString *args = [defaults stringForKey:@"Args"];
+	NSString *dns = [defaults stringForKey:@"DNSServer"];
+	NSString *status = [defaults stringForKey:@"LastVPNStatus"];
+	NSString *lastStart = [defaults stringForKey:@"LastStartArguments"];
+	NSString *lastError = [defaults stringForKey:@"LastVPNError"];
+
+	return [NSString stringWithFormat:
+		@"DNS: %@\nIPv6: %@\nSaved Args: %@\nLast Status: %@\nLast Start Args: %@\nLast Error: %@",
+		dns ?: @"not set",
+		[defaults boolForKey:@"IPv6"] ? @"on" : @"off",
+		args ?: @"not set",
+		status ?: @"never started",
+		lastStart ?: @"never started",
+		lastError ?: @"none"];
+}
+
 - (void)loadView {
 	[super loadView];
 
@@ -32,7 +67,7 @@
 
 	self->settings = @[
 		@{@"display": @"Author", @"value": @"Remaxiv", @"type": @"INFO"},
-		@{@"display": @"Version", @"value": @"0.0.5", @"type": @"INFO"},
+		@{@"display": @"Version", @"value": @"0.0.6", @"type": @"INFO"},
 		@{@"display": @"GitHub", @"value": @"github.com/Remaxiv/local-dpi-ios",
 		  @"url": @"https://github.com/Remaxiv/local-dpi-ios", @"type": @"URL"},
 
@@ -44,6 +79,11 @@
 		@{@"name": @"Args", @"display": @"Arguments",
 		  @"type": NSStringFromClass([NSString class]), @"default": [RMSettingsViewController defaultArguments]},
 
+		@{@"display": @"Preset: Standard", @"action": @"presetStandard", @"type": @"ACTION"},
+		@{@"display": @"Preset: TLS only", @"action": @"presetTLS", @"type": @"ACTION"},
+		@{@"display": @"Preset: Aggressive", @"action": @"presetAggressive", @"type": @"ACTION"},
+		@{@"display": @"Reset Arguments", @"action": @"resetArguments", @"type": @"ACTION"},
+		@{@"display": @"Diagnostics", @"type": @"DIAGNOSTICS"},
 		@{@"display": @"byedpi args", @"value": [RMSettingsViewController argumentsHelp], @"type": @"HELP"},
 	];
 }
@@ -60,8 +100,6 @@
 			[defaults setObject:defaultValue forKey:settingName];
 		}
 	}
-
-	[[NSUserDefaults standardUserDefaults] setObject:[RMSettingsViewController defaultArguments] forKey:@"Args"];
 
 	self.tableView.dataSource = self;
 	self.tableView.delegate = self;
@@ -107,6 +145,20 @@
 		infoCell.accessoryType = [@"URL" isEqualToString:typeName] ? UITableViewCellAccessoryDisclosureIndicator : UITableViewCellAccessoryNone;
 		return infoCell;
 	}
+	else if ([@"ACTION" isEqualToString:typeName])
+	{
+		UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ActionCell"];
+		if (cell == nil)
+		{
+			cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ActionCell"];
+		}
+		cell.selectionStyle = UITableViewCellSelectionStyleDefault;
+		cell.textLabel.text = setting[@"display"];
+		cell.textLabel.textColor = [UIColor blueColor];
+		cell.accessoryView = nil;
+		cell.accessoryType = UITableViewCellAccessoryNone;
+		return cell;
+	}
 	else if ([@"HELP" isEqualToString:typeName])
 	{
 		UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"HelpCell"];
@@ -131,6 +183,44 @@
 		textView.translatesAutoresizingMaskIntoConstraints = NO;
 		[textView setContentHuggingPriority:UILayoutPriorityFittingSizeLevel forAxis:UILayoutConstraintAxisVertical];
 		[textView setContentCompressionResistancePriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisVertical];
+
+		UIStackView *stackView = [[UIStackView alloc] initWithArrangedSubviews:@[configLabel, textView]];
+		[cell.contentView addSubview:stackView];
+		stackView.axis = UILayoutConstraintAxisVertical;
+		stackView.distribution = UIStackViewDistributionFill;
+		stackView.alignment = UIStackViewAlignmentLeading;
+		stackView.spacing = 8;
+		stackView.translatesAutoresizingMaskIntoConstraints = NO;
+		[NSLayoutConstraint activateConstraints:@[
+			[stackView.leftAnchor constraintEqualToAnchor:cell.contentView.layoutMarginsGuide.leftAnchor],
+			[stackView.rightAnchor constraintEqualToAnchor:cell.contentView.layoutMarginsGuide.rightAnchor],
+			[stackView.topAnchor constraintEqualToAnchor:cell.contentView.layoutMarginsGuide.topAnchor],
+			[stackView.bottomAnchor constraintEqualToAnchor:cell.contentView.layoutMarginsGuide.bottomAnchor],
+		]];
+		return cell;
+	}
+	else if ([@"DIAGNOSTICS" isEqualToString:typeName])
+	{
+		UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"DiagnosticsCell"];
+		if (cell == nil)
+		{
+			cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"DiagnosticsCell"];
+		}
+		cell.selectionStyle = UITableViewCellSelectionStyleNone;
+		[[cell.contentView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+
+		UILabel *configLabel = [[UILabel alloc] init];
+		configLabel.text = setting[@"display"];
+
+		UITextView *textView = [[UITextView alloc] init];
+		textView.text = [RMSettingsViewController diagnosticsSummary];
+		textView.font = [UIFont fontWithName:@"Courier New" size:[UIFont systemFontSize]];
+		textView.textAlignment = NSTextAlignmentLeft;
+		textView.editable = NO;
+		textView.selectable = YES;
+		textView.scrollEnabled = NO;
+		textView.backgroundColor = [UIColor clearColor];
+		textView.translatesAutoresizingMaskIntoConstraints = NO;
 
 		UIStackView *stackView = [[UIStackView alloc] initWithArrangedSubviews:@[configLabel, textView]];
 		[cell.contentView addSubview:stackView];
@@ -221,10 +311,12 @@
 
 - (void)switchChanged:(UISwitch*)sender {
 	[[NSUserDefaults standardUserDefaults] setBool:[sender isOn] forKey:settings[sender.tag][@"name"]];
+	[[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 - (void)textFieldEditingDidEnd:(UITextField*)sender {
 	[[NSUserDefaults standardUserDefaults] setObject:sender.text forKey:settings[sender.tag][@"name"]];
+	[[NSUserDefaults standardUserDefaults] synchronize];
 	[sender resignFirstResponder];
 }
 
@@ -244,10 +336,42 @@
 			[[UIApplication sharedApplication] openURL:url];
 		}
 	}
+	else if ([@"ACTION" isEqualToString:setting[@"type"]])
+	{
+		NSString *action = setting[@"action"];
+		NSString *args = nil;
+		if ([@"presetStandard" isEqualToString:action] || [@"resetArguments" isEqualToString:action])
+		{
+			args = [RMSettingsViewController defaultArguments];
+		}
+		else if ([@"presetTLS" isEqualToString:action])
+		{
+			args = [RMSettingsViewController tlsOnlyArguments];
+		}
+		else if ([@"presetAggressive" isEqualToString:action])
+		{
+			args = [RMSettingsViewController aggressiveArguments];
+		}
+
+		if (args)
+		{
+			[[NSUserDefaults standardUserDefaults] setObject:args forKey:@"Args"];
+			[[NSUserDefaults standardUserDefaults] synchronize];
+			[self.tableView reloadData];
+		}
+	}
 }
 
 #pragma mark - Text View Delegate
 - (void)textViewDidChange:(UITextView *)textView {
+	NSDictionary *setting = settings[textView.tag];
+	NSString *settingName = setting[@"name"];
+	if (settingName)
+	{
+		[[NSUserDefaults standardUserDefaults] setObject:textView.text forKey:settingName];
+		[[NSUserDefaults standardUserDefaults] synchronize];
+	}
+
     // Invalidate the intrinsic content size so the text view reports its new height
     [textView invalidateIntrinsicContentSize];
 
@@ -258,6 +382,7 @@
 
 - (void)textViewDidEndEditing:(UITextView *)textView {
 	[[NSUserDefaults standardUserDefaults] setObject:textView.text forKey:settings[textView.tag][@"name"]];
+	[[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 

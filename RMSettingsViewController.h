@@ -6,6 +6,9 @@
 }
 
 + (NSString *)defaultArguments;
++ (NSString *)tlsOnlyArguments;
++ (NSString *)aggressiveArguments;
 + (NSString *)argumentsHelp;
++ (NSString *)diagnosticsSummary;
 
 @end
